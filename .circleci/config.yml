@@ -15,10 +15,14 @@ workflows:
           create-repo: true
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           tag: "${CIRCLE_SHA1}"
+      - hold-for-production:
+          type: approval
+          requires:
+            - aws-ecr/build-and-push-image
       - aws-eks/update-container-image:
           cluster-name: "${EKS_CLUSTER_NAME}"
           aws-region: "${AWS_DEFAULT_REGION}"
           container-image-updates: '${EKS_CONTAINER_NAME}=${AWS_ACCOUNT_URL}/${AWS_RESOURCE_NAME_PREFIX}:${CIRCLE_SHA1}'
           resource-name: "${EKS_DEPLOYMENT_NAME}"
           requires:
-            - aws-ecr/build-and-push-image
+            - hold-for-production
